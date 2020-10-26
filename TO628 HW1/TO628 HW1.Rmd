@@ -1,0 +1,118 @@
+---
+title: "TO 628 HW 1"
+author: "Shanza Raza"
+date: "10/22/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reading my data 
+
+```{r, cache=TRUE}
+nyc <- read.csv("nycflights.csv")
+class(nyc)
+
+```
+
+## Cleaning the data 
+
+```{r}
+# Deleting the column x
+nyc$X <- NULL
+
+# Factorize column that needs to be a factor 
+nyc$origin <- as.factor(nyc$origin)
+nyc$tailnum <- as.factor(nyc$tailnum)
+nyc$month <- as.factor(nyc$month)
+nyc$dest <- as.factor(nyc$dest)
+nyc$carrier <- as.factor(nyc$carrier)
+nyc$flight <- as.factor(nyc$flight)
+
+#Recheck my data
+
+str(nyc)
+
+```
+
+## Exploration of Data 
+
+```{r}
+#How many airlines are there?
+uniquecarriers <- unique(nyc$carrier)
+#print(uniquecarriers)
+length(uniquecarriers)
+
+#How many flights there were by the airline with code
+codeOO <- nyc[nyc$carrier == "OO", ]
+nrow(codeOO)
+
+#How long is the shortest flight out of any NYC airport?
+min(nyc$air_time, na.rm = TRUE)
+
+#How many flights where there by United Airlines (code: UA) on Jan 12th 2013?
+UAflights <- nyc[nyc$carrier == "UA" & nyc$year == 2013 & nyc$month == 01 & nyc$day == 12, ]
+#print(UAflights)
+nrow(UAflights)
+```
+
+## Arrival Delay
+
+```{r}
+#What was the average arrival delay for all airports and all airlines combined in Jan 2013?
+AllDelayJan <- nyc[nyc$year == 2013 & nyc$month == 01, ]
+#print(AllDelayJan)
+mean(AllDelayJan$arr_delay, na.rm = TRUE) 
+
+#Whats was the median arrival delay for all airports and all airlines combined in Jan 2013?
+median(AllDelayJan$arr_delay, na.rm = TRUE) 
+
+```
+
+
+The distribution is skewed to the left based on the median value of `r mean(AllDelayJan$arr_delay, na.rm = TRUE)`  and mean value of `r median(AllDelayJan$arr_delay, na.rm = TRUE)` 
+
+## Airline Performance
+```{r}
+#Calculate average arrival delays by airline?
+tapply(nyc$arr_delay, nyc$carrier, mean, na.rm = TRUE)
+
+#Draw a Bar Plot of Average Arrival Delays for all the Airlines 
+AvgArrivalDelay <- tapply(nyc$arr_delay, nyc$carrier, mean, na.rm = TRUE)
+barplot(AvgArrivalDelay)
+
+#Which airline has the highest average arrival delay? Which airline has the smallest average arrival delay? Are there airlines that actually have negative average delay? 
+min(AvgArrivalDelay)
+
+names(AvgArrivalDelay[AvgArrivalDelay == min(AvgArrivalDelay)])
+
+max(AvgArrivalDelay)
+
+names(AvgArrivalDelay[AvgArrivalDelay == max(AvgArrivalDelay)])
+
+```
+
+The airline that has the highest average arrival delay is `r names(AvgArrivalDelay[AvgArrivalDelay == max(AvgArrivalDelay)])` and the airline that has the lowest average arrival delay is `r names(AvgArrivalDelay[AvgArrivalDelay == min(AvgArrivalDelay)])`. Yes, there are airlines that do have negative average delays such as `r names(AvgArrivalDelay[AvgArrivalDelay == min(AvgArrivalDelay)])` that has a delay of `r min(AvgArrivalDelay)` 
+
+## Air Gain 
+
+```{r}
+nyc$AirGain <- nyc$dep_delay - nyc$arr_delay
+#View(nyc)
+
+#Explore airgain data and answer the question - do airlines actually gain any time when in air on average?
+mean(nyc$AirGain, na.rm = TRUE)
+
+#Calculate average airgain for different airlines
+tapply(nyc$AirGain, nyc$carrier, mean, na.rm = TRUE)
+
+CatchUp <- tapply(nyc$AirGain, nyc$carrier, mean, na.rm = TRUE)
+barplot(CatchUp)
+```
+
+
